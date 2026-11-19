@@ -1,0 +1,10 @@
+{
+    "monkeyC.developerKeyPath": "developer_key.der",
+    "monkeyC.jungleFiles": "monkey.jungle",
+    "monkeyC.compilerWarnings": true,
+    "monkeyC.typeCheckLevel": "Default",
+    "files.associations": {
+        "*.mc": "monkeyc",
+        "*.jungle": "jungle"
+    }
+}

@@ -1,0 +1,13 @@
+# Build output
+bin/
+*.prg
+*.prg.debug.xml
+*.iq
+
+# Developer signing keys (never commit these)
+developer_key.pem
+developer_key.der
+*.der
+
+# macOS
+.DS_Store
