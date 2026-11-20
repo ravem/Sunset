@@ -16,18 +16,34 @@ import Toybox.WatchUi;
 class SunsetField extends WatchUi.DataField {
 
     private var _sun as SunTimes;
+    private var _lastError as String?;
 
     public function initialize() {
         DataField.initialize();
         _sun = new SunTimes();
+        _lastError = null;
     }
 
     //! Called once per second by the system.
     public function compute(info as Activity.Info) as Void {
-        _sun.update();
+        try {
+            _sun.update();
+        } catch (e instanceof Lang.Exception) {
+            // Never let a data error kill the field: keep the clock running.
+            _lastError = e.getErrorMessage();
+        }
     }
 
     public function onUpdate(dc as Graphics.Dc) as Void {
+        try {
+            draw(dc);
+        } catch (e instanceof Lang.Exception) {
+            _lastError = e.getErrorMessage();
+            drawFallback(dc);
+        }
+    }
+
+    private function draw(dc as Graphics.Dc) as Void {
         _sun.update();
 
         var w = dc.getWidth();
@@ -295,6 +311,28 @@ class SunsetField extends WatchUi.DataField {
     }
 
     // ------------------------------------------------------------- helpers
+
+    //! Minimal fallback if drawing fails: never leave the field blank.
+    private function drawFallback(dc as Graphics.Dc) as Void {
+        dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
+        dc.clear();
+
+        var clock = System.getClockTime();
+        var text = pad2(clock.hour) + ":" + pad2(clock.min);
+        var cy = dc.getHeight() / 2;
+
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+        dc.drawText(dc.getWidth() / 2, cy,
+                    Graphics.FONT_MEDIUM, text, Graphics.TEXT_JUSTIFY_CENTER);
+
+        if (_lastError != null) {
+            dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
+            dc.drawText(dc.getWidth() / 2,
+                        cy + dc.getFontHeight(Graphics.FONT_MEDIUM),
+                        Graphics.FONT_XTINY, _lastError as String,
+                        Graphics.TEXT_JUSTIFY_CENTER);
+        }
+    }
 
     private function drawTextV(dc as Graphics.Dc, x as Numeric, cy as Numeric,
                                font as Graphics.FontType, text as String,

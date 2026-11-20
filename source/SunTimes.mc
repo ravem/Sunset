@@ -108,7 +108,7 @@ class SunTimes {
 
         var moved = true;
         if (_lat != null && _lon != null) {
-            moved = Math.abs(_lat - lat) > 0.02 || Math.abs(_lon - lon) > 0.02;
+            moved = delta(_lat, lat) > 0.02 || delta(_lon, lon) > 0.02;
         }
 
         var stale = (_lastCompute == 0) || ((nowSec - _lastCompute) >= 300);
@@ -186,6 +186,14 @@ class SunTimes {
             eveningBlueStart = utcToLocalMin(solarNoon + 4.0 * hHigh, tz);
             eveningBlueEnd = utcToLocalMin(solarNoon + 4.0 * hLow, tz);
         }
+    }
+
+    //! Absolute difference between two values. Math.abs() only exists from
+    //! API 6.0.3: calling it on a 5.x device crashes with "Could not find
+    //! symbol 'abs'", so the ternary version is used instead.
+    private function delta(a, b) {
+        var d = a - b;
+        return (d < 0) ? -d : d;
     }
 
     //! Hour angle (degrees) at which the sun reaches the given elevation.
